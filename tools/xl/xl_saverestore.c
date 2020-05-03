@@ -123,13 +123,17 @@ void save_domain_core_writeconfig(int fd, const char *source,
             hdr.optional_data_len);
 }
 
-static int save_domain(uint32_t domid, int preserve_domid,
+int save_domain(uint32_t domid, int preserve_domid,
                        const char *filename, int checkpoint,
                        int leavepaused, const char *override_config_file)
 {
     int fd;
     uint8_t *config_data;
     int config_len;
+    fprintf(stderr, "checkpoint:\n" "%d \n", checkpoint);
+    
+    fprintf(stderr, "leavepaused:\n" "%d \n", leavepaused);
+    fprintf(stderr, "preserve_domid:\n" "%d \n", preserve_domid);
 
     save_domain_core_begin(domid, preserve_domid, override_config_file,
                            &config_data, &config_len);
@@ -145,7 +149,8 @@ static int save_domain(uint32_t domid, int preserve_domid,
     }
 
     save_domain_core_writeconfig(fd, filename, config_data, config_len);
-
+    
+    fprintf(stderr, "core_writeconfig done\n");
     int rc = libxl_domain_suspend(ctx, domid, fd, 0, NULL);
     close(fd);
 
@@ -264,6 +269,10 @@ int main_save(int argc, char **argv)
     filename = argv[optind + 1];
     if ( argc - optind >= 3 )
         config_filename = argv[optind + 2];
+    fprintf(stderr, "checkpoint:\n" "%d \n", checkpoint);
+
+    fprintf(stderr, "leavepaused:\n" "%d \n", leavepaused);
+    fprintf(stderr, "preserve_domid:\n" "%d \n", preserve_domid);
 
     save_domain(domid, preserve_domid, filename, checkpoint, leavepaused,
                 config_filename);

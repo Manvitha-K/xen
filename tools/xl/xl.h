@@ -53,7 +53,7 @@ struct domain_create {
 };
 
 int create_domain(struct domain_create *dom_info);
-
+int save_domain(uint32_t domid, int preserve_domid, const char *filename, int checkpoint, int leavepaused, const char *override_config_file);
 
 static const char savefileheader_magic[32]=
     "Xen saved domain, xl format\n \0 \r";

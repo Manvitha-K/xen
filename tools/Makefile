@@ -21,7 +21,6 @@ SUBDIRS-y += xenmon
 SUBDIRS-y += xenstat
 SUBDIRS-$(CONFIG_NetBSD) += xenbackendd
 SUBDIRS-y += libfsimage
-SUBDIRS-$(CONFIG_Linux) += libvchan
 
 # do not recurse in to a dir we are about to delete
 ifneq "$(MAKECMDGOALS)" "distclean"
@@ -33,6 +32,7 @@ SUBDIRS-y += xenpmd
 SUBDIRS-y += libxl
 SUBDIRS-$(CONFIG_GOLANG) += golang
 SUBDIRS-y += xl
+SUBDIRS-$(CONFIG_Linux) += libvchan
 SUBDIRS-y += helpers
 SUBDIRS-$(CONFIG_X86) += xenpaging
 SUBDIRS-$(CONFIG_X86) += debugger/gdbsx

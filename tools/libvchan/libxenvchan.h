@@ -88,6 +88,13 @@ struct libxenvchan {
 	struct libxenvchan_ring read, write;
 };
 
+int libxenvchan_write_all(struct libxenvchan *ctrl, char *buf, int size);
+int write_all(int fd, char *buf, int size);
+void checkpoint_invoke(uint32_t domid);
+void reader_clone(struct libxenvchan *ctrl);
+void writer_clone(struct libxenvchan *ctrl, char* domId);
+void vchan_parse_global_config(const char *configfile, const char *configfile_data, int configfile_len);
+
 /**
  * Set up a vchan, including granting pages
  * @param logger Logger for libxc errors
