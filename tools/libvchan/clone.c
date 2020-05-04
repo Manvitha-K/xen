@@ -284,22 +284,26 @@ void checkpoint_invoke(uint32_t domid){
 void reader_clone(struct libxenvchan *ctrl)
 {
 	int size;
+	int domId = 0;
+	int indxStart = 5; //because first 5 letters expected to be clone
 	for (;;) {
 		size = rand() % (BUFSIZE - 1) + 1;
 		size = libxenvchan_read(ctrl, buf, size);
-		//fprintf(stderr, "#");
 		if (size < 0) {
 			perror("read vchan");
 			libxenvchan_close(ctrl);
 			exit(1);
 		}
 		buf[size] = '\0';
-		if(strncmp(buf,"CLONE", 6)==0){
-			//checkpoint_invoke((uint32_t)(buf[7]));
-			checkpoint_invoke((uint32_t)(23));
+		if(strncmp(buf,"CLONE", 5)==0){
+			while (indxStart < size){
+				domId = domId*10 +( buf[indxStart]-'0');
+				indxStart++;
+			}
+			fprintf(stderr, "%d\n", domId);
+			checkpoint_invoke((uint32_t)(domId));
 			exit(1);
 		}
-
 	}
 }
 
@@ -307,8 +311,8 @@ void writer_clone(struct libxenvchan *ctrl, char* domId)
 {
 	int size;
 	for (;;) {
-		char buff[6] = "CLONE";
-		//strcat(buff, domId);
+		char buff[9] = "CLONE";
+		strcat(buff, domId);
 		size = strlen(buff);
 		
 		size = libxenvchan_write_all(ctrl, buff, size);
