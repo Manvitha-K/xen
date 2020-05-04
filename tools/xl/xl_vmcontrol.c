@@ -769,15 +769,17 @@ int create_domain(struct domain_create *dom_info)
         } else {
             ret = libxl_read_file_contents(ctx, config_file,
                                            &config_data, &config_len);
-            if (ret) { fprintf(stderr, "Failed to read config file: %s: %s\n",
-                               config_file, strerror(errno)); return ERROR_FAIL; }
+            if (ret) { fprintf(stderr, "failed to read config file: %s: %s\n",
+                               config_file, strerror(errno)); 
+	    return ERROR_FAIL; 
+	    }
         }
         if (!restoring && extra_config && strlen(extra_config)) {
             if (config_len > INT_MAX - (strlen(extra_config) + 2 + 1)) {
-                fprintf(stderr, "Failed to attach extra configuration\n");
+                fprintf(stderr, "failed to attach extra configuration\n");
                 return ERROR_FAIL;
             }
-            /* allocate space for the extra config plus two EOLs plus \0 */
+            /* allocate space for the extra config plus two eols plus \0 */
             config_data = xrealloc(config_data, config_len
                 + strlen(extra_config) + 2 + 1);
             config_len += sprintf(config_data + config_len, "\n%s\n",
@@ -787,10 +789,11 @@ int create_domain(struct domain_create *dom_info)
         config_in_json = false;
     } else {
         if (!config_data) {
-            fprintf(stderr, "Config file not specified and"
+            fprintf(stderr, "config file not specified and"
                     " none in save file\n");
             return ERROR_INVAL;
         }
+
         config_source = "<saved>";
         config_in_json = !!(hdr.mandatory_flags & XL_MANDATORY_FLAG_JSON);
     }
@@ -915,7 +918,8 @@ start:
         params.colo_proxy_script = dom_info->colo_proxy_script;
         libxl_defbool_set(&params.userspace_colo_proxy,
                           dom_info->userspace_colo_proxy);
-
+        
+	d_config.c_info.name = "hello";
         ret = libxl_domain_create_restore(ctx, &d_config,
                                           &domid, restore_fd,
                                           send_back_fd, &params,
@@ -1246,6 +1250,8 @@ int main_create(int argc, char **argv)
     dom_info.vncautopass = vncautopass;
     dom_info.console_autoconnect = console_autoconnect;
     dom_info.ignore_global_affinity_masks = ignore_masks;
+    
+    fprintf(stderr, "%s\n", dom_info.extra_config);
 
     rc = create_domain(&dom_info);
     if (rc < 0) {

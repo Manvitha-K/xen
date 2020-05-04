@@ -122,8 +122,78 @@ void save_domain_core_writeconfig(int fd, const char *source,
             source, hdr.mandatory_flags, hdr.optional_flags,
             hdr.optional_data_len);
 }
+int csave_domain(uint32_t domid, int preserve_domid,
+                       const char *filename, int checkpoint,
+                       int leavepaused, const char *override_config_file)
+{
+    int fd;
+    uint8_t *config_data;
+    int config_len;
+    struct domain_create dom_info;
+    int paused = 0, debug = 0, daemonize = 1, monitor = 1,
+        console_autoconnect = 0, vnc = 0, vncautopass = 0;
+    
 
-int save_domain(uint32_t domid, int preserve_domid,
+    save_domain_core_begin(domid, preserve_domid, override_config_file,
+                           &config_data, &config_len);
+
+    if (!config_len) {
+        fputs(" Savefile will not contain xl domain config\n", stderr);
+    }
+
+    fd = open(filename, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+    if (fd < 0) {
+        fprintf(stderr, "Failed to open temp file %s for writing\n", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    save_domain_core_writeconfig(fd, filename, config_data, config_len);
+    
+    fprintf(stderr, "core_writeconfig done\n");
+    int rc = libxl_domain_suspend(ctx, domid, fd, 0, NULL);
+    close(fd);
+
+    if (rc < 0) {
+        fprintf(stderr, "Failed to save domain, resuming domain\n");
+        libxl_domain_resume(ctx, domid, 1, 0);
+    }
+    else if (leavepaused || checkpoint) {
+        if (leavepaused)
+            libxl_domain_pause(ctx, domid, NULL);
+        libxl_domain_resume(ctx, domid, 1, 0);
+    }
+    else {
+        //libxl_domain_resume(ctx, domid, 1, 0);
+    }
+    
+    memset(&dom_info, 0, sizeof(dom_info));
+    dom_info.debug = debug;
+    dom_info.daemonize = daemonize;
+    dom_info.monitor = monitor;
+    dom_info.paused = paused;
+    dom_info.config_file = NULL;
+    dom_info.restore_file = filename;
+    dom_info.migrate_fd = -1;
+    dom_info.send_back_fd = -1;
+    dom_info.vnc = vnc;
+    dom_info.vncautopass = vncautopass;
+    dom_info.console_autoconnect = console_autoconnect;
+    dom_info.extra_config = "name=\"hello\"";
+
+    fprintf(stderr, "create domain invoked\n");
+    fprintf(stderr, "%s\n", dom_info.extra_config);
+    rc = create_domain(&dom_info);
+    
+    if (rc < 0)
+	return EXIT_FAILURE;
+    return EXIT_SUCCESS;
+}
+
+
+
+
+
+static int save_domain(uint32_t domid, int preserve_domid,
                        const char *filename, int checkpoint,
                        int leavepaused, const char *override_config_file)
 {
@@ -163,8 +233,10 @@ int save_domain(uint32_t domid, int preserve_domid,
             libxl_domain_pause(ctx, domid, NULL);
         libxl_domain_resume(ctx, domid, 1, 0);
     }
-    else
+    else {
         libxl_domain_destroy(ctx, domid, 0);
+    }
+
 
     exit(rc < 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }

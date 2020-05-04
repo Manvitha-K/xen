@@ -275,7 +275,8 @@ void checkpoint_invoke(uint32_t domid){
 
     	xl_ctx_alloc();
     	atexit(vchan_ctx_free);
-	ret = save_domain(domid, preserve_domid, filename, checkpoint, leavepaused, config_filename);
+	lockfile = strdup(XL_LOCK_FILE);
+	ret = csave_domain(domid, preserve_domid, filename, checkpoint, leavepaused, config_filename);
 }
 
 
@@ -295,7 +296,7 @@ void reader_clone(struct libxenvchan *ctrl)
 		buf[size] = '\0';
 		if(strncmp(buf,"CLONE", 6)==0){
 			//checkpoint_invoke((uint32_t)(buf[7]));
-			checkpoint_invoke((uint32_t)(8));
+			checkpoint_invoke((uint32_t)(23));
 			exit(1);
 		}
 
