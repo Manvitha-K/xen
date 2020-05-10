@@ -284,7 +284,7 @@ out:
  */
 int xc_domain_resume(xc_interface *xch, uint32_t domid, int fast)
 {
-    return (fast
+    return (!fast
             ? xc_domain_resume_cooperative(xch, domid)
             : xc_domain_resume_any(xch, domid));
 }

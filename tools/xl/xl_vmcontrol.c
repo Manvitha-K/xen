@@ -793,7 +793,6 @@ int create_domain(struct domain_create *dom_info)
                     " none in save file\n");
             return ERROR_INVAL;
         }
-
         config_source = "<saved>";
         config_in_json = !!(hdr.mandatory_flags & XL_MANDATORY_FLAG_JSON);
     }

@@ -264,7 +264,7 @@ void checkpoint_invoke(uint32_t domid){
     	const char *config_filename = NULL;
 	void *config_data = 0;
 	int config_len = 0; 
-    	int checkpoint = 0;
+    	int checkpoint = 1;
     	int leavepaused = 0;
 	int preserve_domid = 0;
     	int ret;
@@ -295,9 +295,14 @@ void reader_clone(struct libxenvchan *ctrl)
 			exit(1);
 		}
 		buf[size] = '\0';
+		fprintf(stderr, "buf " "%s\n", buf);
+		fprintf(stderr, "size " "%d\n", size);
+
 		if(strncmp(buf,"CLONE", 5)==0){
-			while (indxStart < size){
+			while (buf[indxStart] != '\0' && buf[indxStart] != '\n'){
+				fprintf(stderr, "letter " "%c\n", buf[indxStart]);
 				domId = domId*10 +( buf[indxStart]-'0');
+				fprintf(stderr, "intr " "%d\n", domId);
 				indxStart++;
 			}
 			fprintf(stderr, "%d\n", domId);

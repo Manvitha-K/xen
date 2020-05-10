@@ -163,7 +163,7 @@ int csave_domain(uint32_t domid, int preserve_domid,
         libxl_domain_resume(ctx, domid, 1, 0);
     }
     else {
-        //libxl_domain_resume(ctx, domid, 1, 0);
+        libxl_domain_destroy(ctx, domid, 0);
     }
     
     memset(&dom_info, 0, sizeof(dom_info));
