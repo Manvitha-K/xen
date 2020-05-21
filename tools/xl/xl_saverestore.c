@@ -20,6 +20,7 @@
 #include <sys/utsname.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include <libxl.h>
 #include <libxl_utils.h>
@@ -122,6 +123,18 @@ void save_domain_core_writeconfig(int fd, const char *source,
             source, hdr.mandatory_flags, hdr.optional_flags,
             hdr.optional_data_len);
 }
+
+static void write_child_domid(char* childDomName, uint32_t parDomId){
+    fprintf(stderr, "write child domid invoked\n");
+    //uint32_t childDomId = find_domain(childDomName);
+    uint32_t childDomId = 3;
+    char cmd[100];
+    sprintf(cmd, "sudo xenstore-write /local/domain/%u %u", parDomId, childDomId);
+    fprintf(stderr, "Executing command %s \n", cmd);
+    system(cmd);
+}
+
+
 int csave_domain(uint32_t domid, int preserve_domid,
                        const char *filename, int checkpoint,
                        int leavepaused, const char *override_config_file)
@@ -178,14 +191,15 @@ int csave_domain(uint32_t domid, int preserve_domid,
     dom_info.vnc = vnc;
     dom_info.vncautopass = vncautopass;
     dom_info.console_autoconnect = console_autoconnect;
-    dom_info.extra_config = "name=\"hello\"";
 
-    fprintf(stderr, "create domain invoked\n");
-    fprintf(stderr, "%s\n", dom_info.extra_config);
+    fprintf(stderr, "##################create domain invoked\n");
+    write_child_domid("hello", domid);
     rc = create_domain(&dom_info);
     
     if (rc < 0)
 	return EXIT_FAILURE;
+    
+    //write_child_domid("hello", domid);
     return EXIT_SUCCESS;
 }
 
